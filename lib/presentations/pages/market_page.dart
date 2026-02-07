@@ -1,4 +1,5 @@
 import 'package:base_interactive_test_case/presentations/status/market_status.dart';
+import 'package:base_interactive_test_case/presentations/status/web_socket_status.dart';
 import 'package:base_interactive_test_case/presentations/widgets/market_row.dart';
 import 'package:base_interactive_test_case/providers/market_providers.dart';
 import 'package:flutter/material.dart';
@@ -13,9 +14,23 @@ class MarketPage extends StatefulWidget {
 
 class _MarketPageState extends State<MarketPage> {
   @override
+  void initState() {
+    super.initState();
+
+    final marketProvider = context.read<MarketProviders>();
+    Future.microtask(() => marketProvider.refreshData());
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    final marketProvider = context.read<MarketProviders>();
+    marketProvider.disconnectWebSocket();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final vm = context.watch<MarketProviders>();
-
     return Scaffold(
       backgroundColor: const Color(0xFF0B0E11),
       appBar: AppBar(
@@ -28,12 +43,71 @@ class _MarketPageState extends State<MarketPage> {
             fontWeight: FontWeight.w700,
             fontSize: 20,
             letterSpacing: 0.2,
-            color: Colors.white
+            color: Colors.white,
           ),
         ),
       ),
       body: Column(
         children: [
+          Selector<MarketProviders, Map<String, dynamic>>(
+            selector: (_, provider) => {
+              'errorMessage': provider.errorMessageWebSocket,
+              'status': provider.webSocketStatus,
+            },
+            builder: (context, data, child) {
+              final errorMessage = data['errorMessage'] as String?;
+              final status = data['status'] as WebSocketStatus;
+
+              if (status == WebSocketStatus.error && errorMessage != null) {
+                return Container(
+                  color: Colors.redAccent,
+                  padding: const EdgeInsets.all(8),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.error, color: Colors.white),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          errorMessage,
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              } else if (status == WebSocketStatus.disconnected) {
+                return Container(
+                  color: Colors.orangeAccent,
+                  padding: const EdgeInsets.all(8),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.info_outline, color: Colors.white),
+                      const SizedBox(width: 8),
+                      const Expanded(
+                        child: Text(
+                          'Data is currently not being updated',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                      OutlinedButton(
+                        onPressed: () {
+                          vm.connectWebSocket();
+                        },
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: Colors.white),
+                          foregroundColor: Colors.white,
+                        ),
+                        child: const Text('Refresh'),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              return const SizedBox.shrink();
+            },
+          ),
+
           _MarketHeader(),
           const Divider(height: 1, color: Color(0xFF1E2329)),
           Expanded(child: _buildBody(vm)),
@@ -53,10 +127,7 @@ class _MarketPageState extends State<MarketPage> {
         );
 
       case MarketStatus.error:
-        return _ErrorView(
-          message: vm.errorMessage,
-          onRetry: vm.loadInitialData,
-        );
+        return _ErrorView(message: vm.errorMessage, onRetry: vm.refreshData);
 
       case MarketStatus.success:
         return Scrollbar(
@@ -66,10 +137,7 @@ class _MarketPageState extends State<MarketPage> {
             itemCount: vm.symbols.length,
             itemBuilder: (context, index) {
               final symbol = vm.symbols[index];
-              return MarketRow(
-                key: ValueKey(symbol),
-                symbol: symbol,
-              );
+              return MarketRow(key: ValueKey(symbol), symbol: symbol);
             },
           ),
         );
@@ -79,7 +147,6 @@ class _MarketPageState extends State<MarketPage> {
     }
   }
 }
-
 
 class _MarketHeader extends StatelessWidget {
   @override
@@ -131,16 +198,11 @@ class _MarketHeader extends StatelessWidget {
   }
 }
 
-
-
 class _ErrorView extends StatelessWidget {
   final String? message;
   final VoidCallback onRetry;
 
-  const _ErrorView({
-    required this.message,
-    required this.onRetry,
-  });
+  const _ErrorView({required this.message, required this.onRetry});
 
   @override
   Widget build(BuildContext context) {
@@ -150,19 +212,12 @@ class _ErrorView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
-              Icons.cloud_off,
-              color: Colors.redAccent,
-              size: 56,
-            ),
+            const Icon(Icons.cloud_off, color: Colors.redAccent, size: 56),
             const SizedBox(height: 16),
             Text(
               message ?? 'Unable to load market data',
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Color(0xFF848E9C),
-                fontSize: 14,
-              ),
+              style: const TextStyle(color: Color(0xFF848E9C), fontSize: 14),
             ),
             const SizedBox(height: 24),
             OutlinedButton(

@@ -13,7 +13,7 @@ void main() {
           create: (_) {
             final httpService = BinanceHttpService();
             final repository = MarketRepository(httpService);
-            return MarketProviders(repository)..loadInitialData();
+            return MarketProviders(repository);
           },
         ),
       ],
@@ -29,6 +29,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Base Interactive Test Case',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
