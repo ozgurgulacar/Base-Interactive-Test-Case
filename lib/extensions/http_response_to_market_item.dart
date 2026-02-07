@@ -12,6 +12,15 @@ extension HttpResponseToMarketItem on HttpResponseModel {
       volume: double.parse(volume),
       priceChange: double.parse(priceChange),
       priceChangePercent: double.parse(priceChangePercent),
+      quoteVolume: double.parse(quoteVolume),
+      weightedAvgPrice: double.parse(weightedAvgPrice),
+      bidPrice: double.parse(bidPrice),
+      bidQty: double.parse(bidQty),
+      askPrice: double.parse(askPrice),
+      askQty: double.parse(askQty),
+      openTime: openTime,
+      closeTime: closeTime,
+      tradeCount: tradeCount,
     );
   }
 }

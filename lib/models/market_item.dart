@@ -5,10 +5,22 @@ class MarketItem {
   double openPrice;
   double highPrice;
   double lowPrice;
+
   double volume;
+  double quoteVolume;
 
   double priceChange;
   double priceChangePercent;
+  double weightedAvgPrice;
+
+  double bidPrice;
+  double bidQty;
+  double askPrice;
+  double askQty;
+
+  int openTime;
+  int closeTime;
+  int tradeCount;
 
   MarketItem({
     required this.symbol,
@@ -17,8 +29,17 @@ class MarketItem {
     required this.highPrice,
     required this.lowPrice,
     required this.volume,
+    required this.quoteVolume,
     required this.priceChange,
     required this.priceChangePercent,
+    required this.weightedAvgPrice,
+    required this.bidPrice,
+    required this.bidQty,
+    required this.askPrice,
+    required this.askQty,
+    required this.openTime,
+    required this.closeTime,
+    required this.tradeCount,
   });
 
   void updateFromStream({
