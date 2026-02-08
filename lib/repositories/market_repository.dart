@@ -6,6 +6,7 @@ import 'package:base_interactive_test_case/services/binance_ws_service.dart';
 
 class MarketRepository {
   final BinanceHttpService _httpService;
+  
   final BinanceWSService _wsService = BinanceWSService();
 
   MarketRepository(this._httpService);
@@ -25,4 +26,6 @@ class MarketRepository {
   void disconnectWebSocket(MarketProviders marketProvider) {
     _wsService.disconnect(marketProvider);
   }
+
+
 }

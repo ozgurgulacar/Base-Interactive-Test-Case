@@ -1,4 +1,3 @@
-import 'package:base_interactive_test_case/presentations/status/web_socket_status.dart';
 import 'package:base_interactive_test_case/presentations/widgets/web_socket_status_banner.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -12,7 +11,6 @@ class MarketDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final vm = context.watch<MarketProviders>();
     return Scaffold(
       backgroundColor: const Color(0xFF0B0E11),
       appBar: AppBar(
@@ -30,11 +28,12 @@ class MarketDetailPage extends StatelessWidget {
       ),
       body: Column(
         children: [
+
           WebSocketStatusBanner(),
 
-          Consumer<MarketProviders>(
-            builder: (context, vm, _) {
-              final item = vm.getItem(symbol);
+          Selector<MarketProviders, MarketItem?>(
+            selector: (_, vm) => vm.getItem(symbol),
+            builder: (_, item, _) {
               if (item == null) {
                 return const Center(
                   child: CircularProgressIndicator(color: Colors.amber),

@@ -1,5 +1,4 @@
 import 'package:base_interactive_test_case/presentations/status/market_status.dart';
-import 'package:base_interactive_test_case/presentations/status/web_socket_status.dart';
 import 'package:base_interactive_test_case/presentations/widgets/market_row.dart';
 import 'package:base_interactive_test_case/presentations/widgets/web_socket_status_banner.dart';
 import 'package:base_interactive_test_case/providers/market_providers.dart';

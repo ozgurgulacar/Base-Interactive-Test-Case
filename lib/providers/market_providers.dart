@@ -22,19 +22,12 @@ class MarketProviders extends ChangeNotifier {
 
   MarketItem? getItem(String symbol) => _marketMap[symbol];
 
-  void setErrorWebSocket(String message) {
-    webSocketStatus = WebSocketStatus.error;
-    errorMessageWebSocket = message;
-    notifyListeners();
-  }
-
   Future<void> loadInitialData() async {
     status = MarketStatus.loading;
     errorMessage = null;
     notifyListeners();
 
     try {
-      print('Fetching initial market data...');
       final items = await repository.fetchInitialMarketData();
 
       for (final item in items) {
@@ -45,11 +38,9 @@ class MarketProviders extends ChangeNotifier {
     } catch (e) {
       status = MarketStatus.error;
       errorMessage = e.toString();
-      print('Error loading initial data: $errorMessage');
     }
 
     notifyListeners();
-    print('Initial data loaded: ${_marketMap.length} items');
   }
 
   Future<void> refreshData() async {
@@ -60,7 +51,6 @@ class MarketProviders extends ChangeNotifier {
   }
 
   Future<void> connectWebSocket() async {
-    print('Connecting to WebSocket...');
 
     webSocketStatus = WebSocketStatus.loading;
     errorMessageWebSocket = null;
@@ -72,14 +62,12 @@ class MarketProviders extends ChangeNotifier {
     } catch (e) {
       webSocketStatus = WebSocketStatus.error;
       errorMessageWebSocket = e.toString();
-      print('Error connecting to WebSocket: $errorMessageWebSocket');
     }
 
     notifyListeners();
   }
 
   Future<void> disconnectWebSocket() async {
-    print('Disconnecting from WebSocket...');
 
     webSocketStatus = WebSocketStatus.loading;
     errorMessageWebSocket = null;
@@ -91,7 +79,6 @@ class MarketProviders extends ChangeNotifier {
     } catch (e) {
       webSocketStatus = WebSocketStatus.error;
       errorMessageWebSocket = e.toString();
-      print('Error disconnecting from WebSocket: $errorMessageWebSocket');
     }
 
     notifyListeners();
@@ -138,6 +125,22 @@ class MarketProviders extends ChangeNotifier {
 
   void clearSearch() {
     _filteredSymbols = null;
+    notifyListeners();
+  }
+
+  void setErrorWebSocket(String message) {
+    webSocketStatus = WebSocketStatus.error;
+    errorMessageWebSocket = message;
+    notifyListeners();
+  }
+
+  void setDisconnectingWebSocket() {
+    webSocketStatus = WebSocketStatus.disconnected;
+    notifyListeners();
+  }
+
+  void setConnectedWebSocket() {
+    webSocketStatus = WebSocketStatus.connected;
     notifyListeners();
   }
 }

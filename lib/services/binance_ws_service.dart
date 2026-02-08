@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:base_interactive_test_case/presentations/status/web_socket_status.dart';
 import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:base_interactive_test_case/providers/market_providers.dart';
@@ -22,7 +21,6 @@ class BinanceWSService {
       marketProvider.setErrorWebSocket(
         'No internet connection. Will attempt to reconnect automatically within 5 seconds',
       );
-
       _reconnect(marketProvider);
       return;
     }
@@ -56,8 +54,6 @@ class BinanceWSService {
           marketProvider.setErrorWebSocket(
             'Live data error: Will attempt to reconnect automatically within 5 seconds',
           );
-          marketProvider.webSocketStatus = WebSocketStatus.error;
-          marketProvider.notifyListeners();
         }
       },
       onDone: () {
@@ -74,8 +70,6 @@ class BinanceWSService {
         marketProvider.setErrorWebSocket(
           'Live connection error: Will attempt to reconnect automatically within 5 seconds',
         );
-        marketProvider.webSocketStatus = WebSocketStatus.error;
-        marketProvider.notifyListeners();
 
         _reconnect(marketProvider);
       },
@@ -95,6 +89,7 @@ class BinanceWSService {
     } catch (_) {}
 
     await Future.delayed(const Duration(seconds: 5));
+    marketProvider.setConnectedWebSocket();
     connect(marketProvider);
   }
 
@@ -106,11 +101,9 @@ class BinanceWSService {
         await _channel?.sink.close();
       } catch (_) {}
 
-      marketProvider.webSocketStatus = WebSocketStatus.disconnected;
-      marketProvider.notifyListeners();
+      marketProvider.setDisconnectingWebSocket();
     } catch (e) {
       marketProvider.setErrorWebSocket('Error disconnecting WebSocket: ');
-      marketProvider.notifyListeners();
     }
   }
 }
