@@ -2,7 +2,6 @@ import 'package:base_interactive_test_case/presentations/widgets/web_socket_stat
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/market_providers.dart';
-import '../../models/market_item.dart';
 
 class MarketDetailPage extends StatelessWidget {
   final String symbol;
@@ -31,20 +30,20 @@ class MarketDetailPage extends StatelessWidget {
 
           WebSocketStatusBanner(),
 
-          Selector<MarketProviders, MarketItem?>(
-            selector: (_, vm) => vm.getItem(symbol),
-            builder: (_, item, _) {
+          Consumer<MarketProviders>(
+            builder: (context, vm, _) {
+              final item = vm.getItem(symbol);
               if (item == null) {
                 return const Center(
                   child: CircularProgressIndicator(color: Colors.amber),
                 );
               }
-
+          
               final isPositive = item.priceChangePercent >= 0;
               final upColor = const Color(0xFF0ECB81);
               final downColor = const Color(0xFFF6465D);
               final mainColor = isPositive ? upColor : downColor;
-
+          
               return SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
                 child: Column(
@@ -80,7 +79,8 @@ class MarketDetailPage extends StatelessWidget {
                           Row(
                             children: [
                               _pill(
-                                text: '${item.priceChange.toStringAsFixed(6)}',
+                                text:
+                                    '${item.priceChange.toStringAsFixed(6)}',
                                 color: mainColor,
                               ),
                               const SizedBox(width: 8),
@@ -94,9 +94,9 @@ class MarketDetailPage extends StatelessWidget {
                         ],
                       ),
                     ),
-
+          
                     const SizedBox(height: 20),
-
+          
                     Row(
                       children: [
                         Expanded(
@@ -116,33 +116,34 @@ class MarketDetailPage extends StatelessWidget {
                         ),
                         const SizedBox(width: 12),
                         Expanded(
-                          child: _miniStat(title: 'Volume', value: item.volume),
+                          child: _miniStat(
+                            title: 'Volume',
+                            value: item.volume,
+                          ),
                         ),
                       ],
                     ),
-
+          
                     const SizedBox(height: 24),
-
+          
                     _sectionTitle('Market Details'),
                     const SizedBox(height: 8),
-
-                    _infoCard(
-                      children: [
-                        _infoRow('Open Price', item.openPrice),
-                        _divider(),
-                        _infoRow(
-                          'Highest Buy',
-                          item.bidPrice,
-                          valueColor: upColor,
-                        ),
-                        _divider(),
-                        _infoRow(
-                          'Lowest Sell',
-                          item.askPrice,
-                          valueColor: downColor,
-                        ),
-                      ],
-                    ),
+          
+                    _infoCard(children: [
+                      _infoRow('Open Price', item.openPrice),
+                      _divider(),
+                      _infoRow(
+                        'Highest Buy',
+                        item.bidPrice,
+                        valueColor: upColor,
+                      ),
+                      _divider(),
+                      _infoRow(
+                        'Lowest Sell',
+                        item.askPrice,
+                        valueColor: downColor,
+                      ),
+                    ]),
                   ],
                 ),
               );
@@ -152,6 +153,7 @@ class MarketDetailPage extends StatelessWidget {
       ),
     );
   }
+
 
   Widget _pill({required String text, required Color color}) {
     return Container(
@@ -186,7 +188,10 @@ class MarketDetailPage extends StatelessWidget {
         children: [
           Text(
             title,
-            style: const TextStyle(color: Color(0xFF848E9C), fontSize: 12),
+            style: const TextStyle(
+              color: Color(0xFF848E9C),
+              fontSize: 12,
+            ),
           ),
           const SizedBox(height: 6),
           Text(
@@ -236,11 +241,17 @@ class MarketDetailPage extends StatelessWidget {
         children: [
           Text(
             title,
-            style: const TextStyle(color: Color(0xFF848E9C), fontSize: 13),
+            style: const TextStyle(
+              color: Color(0xFF848E9C),
+              fontSize: 13,
+            ),
           ),
           Text(
             value.toStringAsFixed(4),
-            style: TextStyle(color: valueColor, fontWeight: FontWeight.w600),
+            style: TextStyle(
+              color: valueColor,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ],
       ),
@@ -248,6 +259,9 @@ class MarketDetailPage extends StatelessWidget {
   }
 
   Widget _divider() {
-    return const Divider(height: 1, color: Color(0xFF2B3139));
+    return const Divider(
+      height: 1,
+      color: Color(0xFF2B3139),
+    );
   }
 }
