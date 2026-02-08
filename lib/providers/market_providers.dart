@@ -16,7 +16,9 @@ class MarketProviders extends ChangeNotifier {
 
   final Map<String, MarketItem> _marketMap = {};
 
-  List<String> get symbols => _marketMap.keys.toList();
+  List<String>? _filteredSymbols;
+
+  List<String> get symbols => _filteredSymbols ?? _marketMap.keys.toList();
 
   MarketItem? getItem(String symbol) => _marketMap[symbol];
 
@@ -120,6 +122,22 @@ class MarketProviders extends ChangeNotifier {
       newVolume: volume,
     );
 
+    notifyListeners();
+  }
+
+  void search(String query) {
+    if (query.isEmpty) {
+      _filteredSymbols = null;
+    } else {
+      _filteredSymbols = _marketMap.keys
+          .where((symbol) => symbol.toLowerCase().contains(query.toLowerCase()))
+          .toList();
+    }
+    notifyListeners();
+  }
+
+  void clearSearch() {
+    _filteredSymbols = null;
     notifyListeners();
   }
 }

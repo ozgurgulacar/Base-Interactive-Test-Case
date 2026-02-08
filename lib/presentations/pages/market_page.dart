@@ -14,19 +14,28 @@ class MarketPage extends StatefulWidget {
 }
 
 class _MarketPageState extends State<MarketPage> {
+  final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
+
   @override
   void initState() {
     super.initState();
 
     final marketProvider = context.read<MarketProviders>();
     Future.microtask(() => marketProvider.refreshData());
+
+    _searchController.addListener(() {
+      marketProvider.search(_searchController.text.trim());
+    });
   }
 
   @override
   void dispose() {
-    super.dispose();
+    _searchController.dispose();
     final marketProvider = context.read<MarketProviders>();
+    marketProvider.clearSearch();
     marketProvider.disconnectWebSocket();
+    super.dispose();
   }
 
   @override
@@ -50,9 +59,35 @@ class _MarketPageState extends State<MarketPage> {
       ),
       body: Column(
         children: [
-          
           WebSocketStatusBanner(),
-
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: TextField(
+              controller: _searchController,
+              style: const TextStyle(color: Colors.white),
+              autofocus: false,
+              textInputAction: TextInputAction.search,
+              decoration: InputDecoration(
+                hintText: 'Search by symbol',
+                hintStyle: const TextStyle(color: Colors.grey),
+                prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                suffixIcon: _searchController.text.isEmpty
+                    ? null
+                    : IconButton(
+                        icon: const Icon(Icons.close, color: Colors.grey),
+                        onPressed: () {
+                          _searchController.clear();
+                        },
+                      ),
+                fillColor: const Color(0xFF1E2329),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: const BorderSide(color: Colors.white, width: 2),
+                ),
+                contentPadding: const EdgeInsets.symmetric(vertical: 0),
+              ),
+            ),
+          ),
           _MarketHeader(),
           const Divider(height: 1, color: Color(0xFF1E2329)),
           Expanded(child: _buildBody(vm)),
