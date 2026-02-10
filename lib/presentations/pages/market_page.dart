@@ -39,7 +39,7 @@ class _MarketPageState extends State<MarketPage> {
 
   @override
   Widget build(BuildContext context) {
-    final vm = context.watch<MarketProviders>();
+    final vm = context.select<MarketProviders, MarketStatus>((vm) => vm.status);
     return Scaffold(
       backgroundColor: const Color(0xFF0B0E11),
       appBar: AppBar(
@@ -95,8 +95,9 @@ class _MarketPageState extends State<MarketPage> {
     );
   }
 
-  Widget _buildBody(MarketProviders vm) {
-    switch (vm.status) {
+  Widget _buildBody(MarketStatus vm) {
+    final MarketProviders marketProvider = context.read<MarketProviders>();
+    switch (vm) {
       case MarketStatus.loading:
         return const Center(
           child: CircularProgressIndicator(
@@ -106,14 +107,20 @@ class _MarketPageState extends State<MarketPage> {
         );
 
       case MarketStatus.error:
-        return _ErrorView(message: vm.errorMessage, onRetry: vm.refreshData);
+        return _ErrorView(
+          message: marketProvider.errorMessage,
+          onRetry: marketProvider.refreshData,
+        );
 
       case MarketStatus.success:
+        final symbols = context.select<MarketProviders, List<String>>(
+          (vm) => vm.symbols,
+        );
         return ListView.builder(
           padding: EdgeInsets.zero,
-          itemCount: vm.symbols.length,
+          itemCount: symbols.length,
           itemBuilder: (context, index) {
-            final symbol = vm.symbols[index];
+            final symbol = symbols[index];
             return MarketRow(key: ValueKey(symbol), symbol: symbol);
           },
         );

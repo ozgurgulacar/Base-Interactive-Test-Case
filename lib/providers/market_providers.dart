@@ -18,7 +18,9 @@ class MarketProviders extends ChangeNotifier {
 
   List<String>? _filteredSymbols;
 
-  List<String> get symbols => _filteredSymbols ?? _marketMap.keys.toList();
+  List<String> get allSymbols => _marketMap.keys.toList();
+
+  List<String> get symbols => _filteredSymbols ?? allSymbols;
 
   MarketItem? getItem(String symbol) => _marketMap[symbol];
 

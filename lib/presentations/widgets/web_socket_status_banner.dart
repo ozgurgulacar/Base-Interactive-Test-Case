@@ -9,64 +9,87 @@ class WebSocketStatusBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Selector<MarketProviders, Map<String, dynamic>>(
-      selector: (_, provider) => {
-        'errorMessage': provider.errorMessageWebSocket,
-        'status': provider.webSocketStatus,
-      },
-      builder: (context, data, child) {
-        final errorMessage = data['errorMessage'] as String?;
-        final status = data['status'] as WebSocketStatus;
-        final vm = context.read<MarketProviders>();
+    final status = context.select<MarketProviders, WebSocketStatus>(
+      (vm) => vm.webSocketStatus,
+    );
 
-        if (status == WebSocketStatus.error && errorMessage != null) {
-          return Container(
-            color: Colors.redAccent,
-            padding: const EdgeInsets.all(8),
-            child: Row(
-              children: [
-                const Icon(Icons.error, color: Colors.white),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    errorMessage,
-                    style: const TextStyle(color: Colors.white),
-                  ),
-                ),
-              ],
-            ),
-          );
-        } else if (status == WebSocketStatus.disconnected) {
-          return Container(
-            color: Colors.orangeAccent,
-            padding: const EdgeInsets.all(8),
-            child: Row(
-              children: [
-                const Icon(Icons.info_outline, color: Colors.white),
-                const SizedBox(width: 8),
-                const Expanded(
-                  child: Text(
-                    'Data is currently not being updated',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-                OutlinedButton(
-                  onPressed: () {
-                    vm.connectWebSocket();
-                  },
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Colors.white),
-                    foregroundColor: Colors.white,
-                  ),
-                  child: const Text('Refresh'),
-                ),
-              ],
-            ),
-          );
-        }
+    final errorMessage = context.select<MarketProviders, String?>(
+      (vm) => vm.errorMessageWebSocket,
+    );
 
-        return const SizedBox.shrink();
-      },
+    final vm = context.read<MarketProviders>();
+
+    if (status == WebSocketStatus.error && errorMessage != null) {
+      return _ErrorBanner(errorMessage: errorMessage);
+    }
+
+    if (status == WebSocketStatus.disconnected) {
+      return _DisconnectedBanner(onRefresh: vm.connectWebSocket);
+    }
+
+    return const SizedBox.shrink();
+  }
+}
+
+
+class _ErrorBanner extends StatelessWidget {
+  final String errorMessage;
+
+  const _ErrorBanner({required this.errorMessage});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.redAccent,
+      padding: const EdgeInsets.all(8),
+      child: Row(
+        children: [
+          const Icon(Icons.error, color: Colors.white),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              errorMessage,
+              style: const TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
+
+
+class _DisconnectedBanner extends StatelessWidget {
+  final VoidCallback onRefresh;
+
+  const _DisconnectedBanner({required this.onRefresh});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.orangeAccent,
+      padding: const EdgeInsets.all(8),
+      child: Row(
+        children: [
+          const Icon(Icons.info_outline, color: Colors.white),
+          const SizedBox(width: 8),
+          const Expanded(
+            child: Text(
+              'Data is currently not being updated',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+          OutlinedButton(
+            onPressed: onRefresh,
+            style: OutlinedButton.styleFrom(
+              side: const BorderSide(color: Colors.white),
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Refresh'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+

@@ -53,14 +53,16 @@ class MarketRow extends StatelessWidget {
 
                 Expanded(
                   flex: 3,
-                  child: Text(
-                    item.lastPrice.toString(),
-                    textAlign: TextAlign.right,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w500,
-                      fontFeatures: [FontFeature.tabularFigures()],
+                  child: RepaintBoundary(
+                    child: Text(
+                      item.lastPrice.toString(),
+                      textAlign: TextAlign.right,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                        fontFeatures: [FontFeature.tabularFigures()],
+                      ),
                     ),
                   ),
                 ),
@@ -82,25 +84,27 @@ class MarketRow extends StatelessWidget {
                       ),
                       borderRadius: BorderRadius.circular(6),
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          isPositive
-                              ? Icons.arrow_drop_up
-                              : Icons.arrow_drop_down,
-                          color: Colors.white,
-                          size: 18,
-                        ),
-                        Text(
-                          '${changePercent.abs().toStringAsFixed(2)}%',
-                          style: const TextStyle(
+                    child: RepaintBoundary(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            isPositive
+                                ? Icons.arrow_drop_up
+                                : Icons.arrow_drop_down,
                             color: Colors.white,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
+                            size: 18,
                           ),
-                        ),
-                      ],
+                          Text(
+                            '${changePercent.abs().toStringAsFixed(2)}%',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
